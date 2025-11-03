@@ -163,7 +163,7 @@ function App() {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Employee Data Extraction
+            Lohnkonten Data Extraction
           </h1>
           <p className="text-gray-600">
             Upload a PDF to extract and process employee data
