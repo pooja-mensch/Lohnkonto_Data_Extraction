@@ -46,19 +46,25 @@ def __push_people(months):
         copy(months)
     ))
 
-def __main():
-    pdf_file = sys.argv[1]
-    template = sys.argv[2]
+def process_pdf(pdf_file, template, password=None):
+    """
+    Process a PDF file and generate Excel output.
 
+    Args:
+        pdf_file: Path to the PDF file or file-like object
+        template: Path to the Excel template file
+
+    Returns:
+        tuple: (output_filename, people_count, processing_time)
+    """
     reader = PdfReader(pdf_file)
     if reader.is_encrypted:
-        print("[INFO] Diese Datei benötigt ein Password, bitte gib es ein:")
-        while True:
-            password = input()
-            if reader.decrypt(password=password) != PasswordType.NOT_DECRYPTED:
-                break
-
-            print("[FEHLER] Falsches Passwort.")
+        if password:
+            decrypt_result = reader.decrypt(password)
+            if decrypt_result == PasswordType.NOT_DECRYPTED:
+                raise ValueError("Incorrect password provided")
+        else:
+            raise ValueError("PDF is encrypted. Please provide a password.")
 
     data_holder.set_pages(reader.pages)
     data_holder.set_pages(reader.pages)
@@ -76,8 +82,7 @@ def __main():
             break
 
     if meta_detector is None:
-        print("[FEHLER] Dieses Format wird derzeit nicht unterstützt.")
-        return
+        raise ValueError("Dieses Format wird derzeit nicht unterstützt.")
 
 
     start = time.time()
@@ -184,6 +189,29 @@ def __main():
     secondsString = str(seconds).zfill(2)
     personsString = "Person wurde" if len(people) == 1 else "Personen wurden"
     print(f"[INFO] {len(people)} {personsString} in {minutes}:{secondsString} extrahiert.")
+
+    # Return output filename, count, and time for API usage
+    if file == 1:
+        output_file = f'{client_name}.xlsx'
+    else:
+        output_file = f'{client_name} {file}.xlsx'
+
+    return output_file, len(people), diff
+
+def __main():
+    """CLI entry point"""
+    if len(sys.argv) < 3:
+        print("Usage: python main.py <pdf_file> <template_file>")
+        return
+
+    pdf_file = sys.argv[1]
+    template = sys.argv[2]
+
+    try:
+        output_file, people_count, processing_time = process_pdf(pdf_file, template)
+        print(f"[INFO] Output saved to: {output_file}")
+    except Exception as e:
+        print(f"[ERROR] {str(e)}")
 
 if __name__ == '__main__':
     # Use function to be able to return on errors (`exit()` causes problems when converted to .exe)

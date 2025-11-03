@@ -1,73 +1,68 @@
-# React + TypeScript + Vite
+# Lohnkonto Data Extraction Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend for uploading and processing employee data documents.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Drag & Drop Upload**: Drag and drop PDF files or click to upload
+- **Progress Tracking**: Real-time upload and processing progress bars
+- **Download Results**: Download processed Excel files
+- **Responsive Design**: Clean, modern UI with Tailwind CSS
 
-## React Compiler
+## Setup
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Install dependencies:
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+2. Configure the API URL:
+   - For **development**: Use `.env.local` (already configured)
+     ```
+     VITE_API_URL=http://localhost:8000
+     ```
+   - For **production**: Use `.env.production` (already configured with Railway backend)
+     ```
+     VITE_API_URL=https://lohnkontodataextraction-production.up.railway.app
+     ```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3. Run the development server:
+```bash
+npm run dev
 ```
+
+4. Build for production:
+```bash
+npm run build
+```
+
+The production build will use the `VITE_API_URL` from `.env.production`.
+
+## Environment Variables
+
+- `VITE_API_URL`: Backend API URL
+  - Development (`.env.local`): `http://localhost:8000`
+  - Production (`.env.production`): `https://lohnkontodataextraction-production.up.railway.app`
+
+## Supported File Formats
+
+Currently supported:
+- PDF files (.pdf)
+
+Note: The backend processes PDF documents and returns Excel files (.xlsx).
+
+## Development
+
+The frontend is built with:
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Lucide React (icons)
+
+## API Integration
+
+The frontend communicates with the backend via:
+- Endpoint: `POST ${VITE_API_URL}/api/process-document`
+- Upload tracking using XMLHttpRequest for progress updates
+- File download using Blob URLs
