@@ -43,7 +43,7 @@ function App() {
     formData.append('file', file);
 
     // Get API URL from environment variable
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://lohnkontodataextraction-production-6d82.up.railway.app/';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://lohnkontodataextraction-production-6d82.up.railway.app';
 
     // Use XMLHttpRequest for upload progress tracking
     const xhr = new XMLHttpRequest();
