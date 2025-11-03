@@ -205,7 +205,7 @@ function App() {
 
                 <button
                   type="button"
-                  className="mt-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="mt-5 px-10 py-8 bg-blue-700 text-white rounded-lg hover:bg-blue-600 transition-colors"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleUploadClick();

@@ -4,19 +4,27 @@ import shutil
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Form
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from dotenv import load_dotenv
 
 from main import process_pdf
 
+# Load environment variables
+load_dotenv()
+
 app = FastAPI(title="Lohnkonto Data Extraction API")
+
+# Get allowed origins from environment variable
+allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "*")
+allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",")] if allowed_origins_str != "*" else ["*"]
 
 # Add CORS middleware to allow frontend to communicate
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend URL
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,14 +42,21 @@ async def root():
             "/api/process-document": "POST - Upload and process PDF document"
         }
     }
+@app.get("/api/data")
+def get_data():
+    return {"data": "This is from the API"}
 
 @app.post("/api/process-document")
-async def process_document(file: UploadFile = File(...)):
+async def process_document(
+    file: UploadFile = File(...),
+    password: Optional[str] = Form(None)
+):
     """
     Process an uploaded PDF document and return the processed Excel file.
 
     Args:
         file: The PDF file to process
+        password: Optional password for encrypted PDFs
 
     Returns:
         FileResponse: The processed Excel file
@@ -77,7 +92,7 @@ async def process_document(file: UploadFile = File(...)):
 
         # Process the PDF
         try:
-            output_filename, people_count, processing_time = process_pdf(pdf_path, TEMPLATE_PATH)
+            output_filename, people_count, processing_time = process_pdf(pdf_path, TEMPLATE_PATH, password)
             output_path = os.path.join(temp_dir, output_filename)
 
             # Debug logging
@@ -118,6 +133,16 @@ async def process_document(file: UploadFile = File(...)):
             os.chdir(original_dir)
 
     except ValueError as e:
+        error_msg = str(e)
+        # Check if this is an encryption error
+        if "PDF is encrypted" in error_msg or "password" in error_msg.lower():
+            raise HTTPException(
+                status_code=401,  # Use 401 to indicate authentication (password) required
+                detail={
+                    "error": "password_required",
+                    "message": error_msg
+                }
+            )
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Processing error: {str(e)}")

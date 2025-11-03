@@ -46,7 +46,7 @@ def __push_people(months):
         copy(months)
     ))
 
-def process_pdf(pdf_file, template):
+def process_pdf(pdf_file, template, password=None):
     """
     Process a PDF file and generate Excel output.
 
@@ -59,7 +59,12 @@ def process_pdf(pdf_file, template):
     """
     reader = PdfReader(pdf_file)
     if reader.is_encrypted:
-        raise ValueError("Encrypted PDF files are not supported via API. Please decrypt the file first.")
+        if password:
+            decrypt_result = reader.decrypt(password)
+            if decrypt_result == PasswordType.NOT_DECRYPTED:
+                raise ValueError("Incorrect password provided")
+        else:
+            raise ValueError("PDF is encrypted. Please provide a password.")
 
     data_holder.set_pages(reader.pages)
     data_holder.set_pages(reader.pages)
