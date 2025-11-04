@@ -2,8 +2,8 @@ import re
 
 from pypdf import PageObject
 
-from classes import DataExtractor, DataMode
-from data_holder import get_current_meta
+from misc.classes import DataExtractor, DataMode
+from misc.data_holder import get_current_meta
 
 
 class DataExtractor7(DataExtractor):

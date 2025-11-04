@@ -2,7 +2,7 @@ import re
 
 from pypdf import PageObject
 
-from classes import DataExtractor, DataMode
+from misc.classes import DataExtractor, DataMode
 
 
 class DataExtractor4(DataExtractor):

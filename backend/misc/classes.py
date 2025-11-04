@@ -2,68 +2,60 @@ from enum import Enum
 
 from pypdf import PageObject
 
-from data_holder import get_current_meta, get_current_page
+from .data_holder import get_current_meta, get_current_page
 
-
-class Person:
-    name: str
-    surname: str
+class MetaData:
+    client_name: str = ""
+    year: int = 0
+    name: str = ""
+    surname: str = ""
+    weekly_hours: str
+    first_start: str
     start: str
     end: str
-    months: list[dict[str, str]]
+    notes: list[str]
 
-    def __init__(self, name, surname, start, end, months):
-        self.name = name
-        self.surname = surname
-        self.start = start
-        self.end = end
-        self.months = months
-
-class MetaResult:
-    client_name: str
-    year: int
-    name: str
-    surname: str
-    start: str
-    end: str
-
-    def __init__(self, client_name, year, name, surname, start, end):
+    def __init__(self, client_name = "", year = 0, name = "", surname = "", weekly_hours = "", first_start = "", start = "", end = "", notes = []):
         self.client_name = client_name
         self.year = year
         self.name = name
         self.surname = surname
+        self.weekly_hours = weekly_hours
+        self.first_start = first_start
         self.start = start
         self.end = end
+        self.notes = notes
+
+
+class Person:
+    meta: MetaData
+    months: list[dict[str, str]]
+
+    def __init__(self, meta, months):
+        self.meta = meta
+        self.months = months
 
 class MetaDetector:
-    client_name = ""
-    year = 0
+    meta: MetaData
 
-    surname = ""
-    name = ""
-    start = ""
-    end = ""
-
-    def __check_length(self, *strings):
+    def _check_length(self, *strings):
         for string in strings:
             if len(string) == 0:
                 return False
         return True
 
     def detect_meta(self, page: PageObject):
-        self.client_name = ""
-        self.year = 0
-        self.surname = ""
-        self.name = ""
-        self.start = ""
-        self.end = ""
+        self.meta = MetaData()
         self.reset()
 
         page.extract_text(visitor_text=self.visitor)
 
-        if not self.__check_length(self.client_name, self.surname, self.name) or self.year == 0:
+        for key in self.meta.__dict__:
+            print(f"{key} = {self.meta.__dict__[key]}")
+        if not self._check_length(self.meta.client_name, self.meta.surname, self.meta.name) or self.meta.year == 0:
             return None
-        return MetaResult(self.client_name, self.year, self.name, self.surname, self.start, self.end)
+
+        return self.meta
 
     def reset(self):
         pass

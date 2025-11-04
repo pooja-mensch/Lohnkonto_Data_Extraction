@@ -3,10 +3,11 @@ from math import floor
 
 from pypdf import PdfReader
 
-from classes import MetaDetector
+from misc.classes import MetaDetector
 
 YEAR_PATTERN = re.compile(r"^\d+ (\d+)")
 DATE_PATTERN = re.compile(r".+ (\d{2}\.\d{2}\.\d{4})")
+WEEKLY_HOURS_PATTERN = re.compile(r".+ (\d{1,2}[.,]\d{2})")
 
 class MetaDetector4(MetaDetector):
 
@@ -27,7 +28,7 @@ class MetaDetector4(MetaDetector):
         if y == 785:
             match = YEAR_PATTERN.match(text)
             if not match is None:
-                self.year = match.group(1)
+                self.meta.year = match.group(1)
 
         if y == 705:
             self.client_line = text
@@ -35,6 +36,8 @@ class MetaDetector4(MetaDetector):
 
         if y == 307 and self.client_line != "":
             self.surname_line = text
+            match = DATE_PATTERN.match(text)
+            self.meta.first_start = "" if match is None else match.group(1)
 
         if y == 228 and self.surname_line != "":
             surname_words = self.surname_line.split(" ")
@@ -46,10 +49,10 @@ class MetaDetector4(MetaDetector):
                 next_word += 1
                 surname_buffer_temp = surname_buffer + " " + surname_words[next_word].strip()
 
-            self.surname = surname_buffer
-            surname_start = self.client_line.find(self.surname)
-            self.client_name = self.client_line[:surname_start]
-            self.client_name = self.client_name[len(self.client_name.split(" ")[0]):].strip() # Remove "Mandant"
+            self.meta.surname = surname_buffer
+            surname_start = self.client_line.find(self.meta.surname)
+            self.meta.client_name = self.client_line[:surname_start]
+            self.meta.client_name = self.meta.client_name[len(self.meta.client_name.split(" ")[0]):].strip() # Remove "Mandant"
 
             name_words = text.split(" ")
             next_word = 0
@@ -60,22 +63,26 @@ class MetaDetector4(MetaDetector):
                 next_word += 1
                 name_buffer_temp = name_buffer + " " + name_words[next_word].strip()
 
-            self.name = name_buffer
+            self.meta.name = name_buffer
 
-        if len(self.name) != 0 and text.startswith(self.name):
-            self.start = text[len(self.name) : len(self.name) + 11].strip()
+        if len(self.meta.name) != 0 and text.startswith(self.meta.name):
+            self.meta.start = text[len(self.meta.name) : len(self.meta.name) + 11].strip()
 
         if self.client_line != "" and y == 148:
             match = DATE_PATTERN.match(text)
-            self.end = "" if match is None else match.group(1)
+            self.meta.end = "" if match is None else match.group(1)
+
+        if self.client_line != "" and y == 69:
+            match = WEEKLY_HOURS_PATTERN.match(text)
+            self.meta.weekly_hours = "" if match is None else match.group(1)
+
 
 # M1
 if __name__ == '__main__':
-    input = "D:\\Lohnkonten_geschützt\\Lohnkonten_multiple_1.pdf"
+    input = "E:\\MNBT\\Lohnkonten_geschützt\\Lohnkonten_Geschützt\\Lohnkonten_multiple_1.pdf"
     template = "Lohnkonten_Projekt_Vorlage.xlsx"
 
     reader = PdfReader(input, password="LoHnScuTz#1984")
     meta = MetaDetector4().detect_meta(reader.pages[0])
-    print(f"{meta.client_name} ; {meta.year}")
-    print(f"{meta.surname} ; {meta.name}")
-    print(f"{meta.start} - {meta.end}")
+    for key in meta.__dict__:
+        print(f"{key} = {meta.__dict__[key]}")

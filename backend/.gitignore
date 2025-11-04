@@ -5,6 +5,9 @@
 #*.xlsx
 #!template.xlsx.example
 
+# PyCharm
+.idea/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -31,3 +34,6 @@ wheels/
 *.pdf
 temp/
 tmp/
+
+# Files used during development
+script.py

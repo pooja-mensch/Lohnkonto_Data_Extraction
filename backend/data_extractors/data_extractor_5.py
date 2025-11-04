@@ -2,7 +2,7 @@ import re
 
 from pypdf import PageObject
 
-from classes import DataExtractor, DataMode
+from misc.classes import DataExtractor, DataMode
 from data_extractors.line_sorter import visit_page
 
 

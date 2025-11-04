@@ -7,8 +7,8 @@ from math import floor, ceil
 from openpyxl import load_workbook
 from pypdf import PdfReader, PasswordType
 
-import data_holder
-from classes import Person
+from misc import data_holder
+from misc.classes import Person
 from data_extractors.data_extractor_1 import DataExtractor1
 from data_extractors.data_extractor_2 import DataExtractor2
 from data_extractors.data_extractor_3 import DataExtractor3
@@ -16,7 +16,7 @@ from data_extractors.data_extractor_4 import DataExtractor4
 from data_extractors.data_extractor_5 import DataExtractor5
 from data_extractors.data_extractor_6 import DataExtractor6
 from data_extractors.data_extractor_7 import DataExtractor7
-from data_holder import *
+from misc.data_holder import *
 from meta_detectors.meta_detector_1 import MetaDetector1
 from meta_detectors.meta_detector_2 import MetaDetector2
 from meta_detectors.meta_detector_3 import MetaDetector3
@@ -24,6 +24,7 @@ from meta_detectors.meta_detector_4 import MetaDetector4
 from meta_detectors.meta_detector_5 import MetaDetector5
 from meta_detectors.meta_detector_6 import MetaDetector6
 from meta_detectors.meta_detector_7 import MetaDetector7
+from misc.notes_extractor import detect_notes
 
 detectors = { # PyInstaller messes with reflection based access
     MetaDetector1(): DataExtractor1(),
@@ -35,14 +36,11 @@ detectors = { # PyInstaller messes with reflection based access
     MetaDetector7(): DataExtractor7(),
 }
 
-people = []
+people: list[Person] = []
 
 def __push_people(months):
     people.append(Person(
-        get_current_meta().name,
-        get_current_meta().surname,
-        get_current_meta().start,
-        get_current_meta().end,
+        get_current_meta(),
         copy(months)
     ))
 
@@ -71,7 +69,7 @@ def process_pdf(pdf_file, template, password=None):
 
     meta_detector = None
     data_extractor = None
-    meta = None
+    meta: MetaData | None = None
 
     for detector in detectors.keys():
         meta = detector.detect_meta(reader.pages[0])
@@ -107,7 +105,7 @@ def process_pdf(pdf_file, template, password=None):
             start_page = True
             if year != meta.year or client_name != meta.client_name:
                 print(f"[ERROR] Meta mismatch: {year} != {meta.year} or {client_name} != {meta.client_name}")
-                return
+                return None
 
             if not get_current_meta() is None and (meta.surname != get_current_meta().surname or meta.name != get_current_meta().name):
                 months = data_extractor.months
@@ -117,6 +115,7 @@ def process_pdf(pdf_file, template, password=None):
                     months[i] = {}
             set_current_meta(meta)
 
+        detect_notes(page)
         data_extractor.process_page(page, start_page)
 
     __push_people(data_extractor.months)
@@ -147,19 +146,20 @@ def process_pdf(pdf_file, template, password=None):
             i = 4
             file += 1
 
-        projectColumn = str(i - 1)
+        project_column = str(i - 1)
         column = str(i)
 
-        project["E" + projectColumn] = person.name
-        data["B" + column] = person.name
-        project["F" + projectColumn] = person.surname
-        data["C" + column] = person.surname
-        project["G" + projectColumn] = person.start
-        data["E" + column] = person.start
-        project["H" + projectColumn] = person.end
-        data["F" + column] = person.end
+        project["E" + project_column] = person.meta.name
+        project["F" + project_column] = person.meta.surname
+        data["B" + column] = person.meta.name
+        data["C" + column] = person.meta.surname
+        data["D" + column] = person.meta.weekly_hours
+        data["E" + column] = person.meta.first_start
+        data["F" + column] = person.meta.start
+        data["G" + column] = person.meta.end
+        data["H" + column] = ", ".join(person.meta.notes)
 
-        def getCellValue(month, key):
+        def get_cell_value(month, key):
             value = month[key] if key in month else 0
 
             if value == "":
@@ -167,15 +167,15 @@ def process_pdf(pdf_file, template, password=None):
             else:
                 return value / 100 # Value is in cents
 
-        monthCounter = 0
+        month_counter = 0
         for __month in person.months:
             if "BRUTTO" in __month:
-                data.cell(row=i, column=monthCounter + 7, value=getCellValue(__month, "BRUTTO"))
-                data.cell(row=i, column=monthCounter + 33, value=getCellValue(__month, "RV"))
-                data.cell(row=i, column=monthCounter + 46, value=getCellValue(__month, "AV"))
-                data.cell(row=i, column=monthCounter + 59, value=getCellValue(__month, "KV"))
-                data.cell(row=i, column=monthCounter + 72, value=getCellValue(__month, "PV"))
-            monthCounter += 1
+                data.cell(row=i, column=month_counter + 9, value=get_cell_value(__month, "BRUTTO"))
+                data.cell(row=i, column=month_counter + 35, value=get_cell_value(__month, "RV"))
+                data.cell(row=i, column=month_counter + 48, value=get_cell_value(__month, "AV"))
+                data.cell(row=i, column=month_counter + 61, value=get_cell_value(__month, "KV"))
+                data.cell(row=i, column=month_counter + 74, value=get_cell_value(__month, "PV"))
+            month_counter += 1
         i += 1
 
     if file == 1:
@@ -186,9 +186,9 @@ def process_pdf(pdf_file, template, password=None):
     diff = ceil(time.time() - start)
     minutes = floor(diff / 60)
     seconds = (diff % 60)
-    secondsString = str(seconds).zfill(2)
-    personsString = "Person wurde" if len(people) == 1 else "Personen wurden"
-    print(f"[INFO] {len(people)} {personsString} in {minutes}:{secondsString} extrahiert.")
+    seconds_string = str(seconds).zfill(2)
+    persons_string = "Person wurde" if len(people) == 1 else "Personen wurden"
+    print(f"[INFO] {len(people)} {persons_string} in {minutes}:{seconds_string} extrahiert.")
 
     # Return output filename, count, and time for API usage
     if file == 1:

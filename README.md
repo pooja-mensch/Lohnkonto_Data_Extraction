@@ -9,7 +9,7 @@ Full-stack application for extracting and processing employee data from PDF docu
 ├── backend/          # FastAPI backend
 │   ├── api.py       # API server
 │   ├── main.py      # PDF processing logic
-│   ├── classes.py   # Data classes
+│   ├── misc/classes.py   # Data classes
 │   ├── data_extractors/  # Data extraction modules
 │   └── meta_detectors/   # Meta information detectors
 │
