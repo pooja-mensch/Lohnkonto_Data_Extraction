@@ -4,7 +4,7 @@
       "nixPkgs": ["python311", "openjdk17"]
     },
     "install": {
-      "cmds": ["/usr/bin/env python3 -m pip install --no-cache-dir -r requirements.txt"]
+      "cmds": [" pip3 install --no-cache-dir -r requirements.txt"]
     }
   },
   "start": {

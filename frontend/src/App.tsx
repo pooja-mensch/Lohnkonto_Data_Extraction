@@ -53,7 +53,7 @@ function App() {
     }
 
     // Get API URL from environment variable
-    const apiUrl = (import.meta.env.VITE_API_URL || 'https://lohnkontodataextraction-production-6d82.up.railway.app').replace(/\/$/, '');
+    const apiUrl = (import.meta.env.VITE_API_URL || 'https://lohnkontodataextraction-production-4c88.up.railway.app').replace(/\/$/, '');
 
     // Use XMLHttpRequest for upload progress tracking
     const xhr = new XMLHttpRequest();
