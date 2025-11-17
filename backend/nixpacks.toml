@@ -2,10 +2,11 @@
 # This file configures how the application is built and run
 
 [phases.setup]
-nixPkgs = ["python311", "jre_headless"]  # Install Python 3.11 and Java Runtime
+# Install Python 3.11 and Java Runtime Environment
+nixPkgs = ["python311", "openjdk17"]
 
 [phases.install]
-cmds = ["pip install -r requirements.txt"]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
 
 [start]
 cmd = "uvicorn api:app --host 0.0.0.0 --port $PORT"
