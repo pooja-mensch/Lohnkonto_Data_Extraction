@@ -30,8 +30,8 @@ print(f"[CORS] Allowed origins: {allowed_origins}")  # Debug print
 # Add CORS middleware to allow frontend to communicate
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -188,6 +188,7 @@ async def health_check():
         "status": "healthy",
         "template_exists": os.path.exists(TEMPLATE_PATH),
         "template_path": TEMPLATE_PATH,
+             "allowed_origins": allowed_origins,
         "java_installed": java_status.get("installed", False),
         "java_version": java_status.get("version_info", "Not available") if java_status.get("installed") else None
     }
