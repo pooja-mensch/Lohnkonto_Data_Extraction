@@ -1,2 +1,11 @@
+[phases.setup]
+nixPkgs = ["python310", "openjdk17"]
+
+[phases.install]
+cmds = ["pip install -r requirements.txt"]
+
+[phases.build]
+cmds = ["echo 'Build phase complete'"]
+
 [start]
-cmd = "uvicorn app:app --host 0.0.0.0 --port $PORT"
+cmd = "python api.py"
