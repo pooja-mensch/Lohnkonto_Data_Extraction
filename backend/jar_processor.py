@@ -29,7 +29,7 @@ class JarProcessor:
         self.base_dir = Path(__file__).parent
 
         # Set default paths relative to base directory
-        self.jar_path = jar_path or str(self.base_dir / "Lohnkonten-1.0.0.jar")
+        self.jar_path = jar_path or str(self.base_dir / "Lohnkonten-1.0.1.jar")
         self.template_path = template_path or str(self.base_dir / "template.xlsx")
         self.output_dir = output_dir or str(self.base_dir / "output")
 
