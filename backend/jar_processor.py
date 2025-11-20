@@ -1,6 +1,6 @@
 """
 JAR Processor Service
-Handles interaction with Lohnkonten-1.0.0.jar for PDF processing
+Handles interaction with Lohnkonten-1.0.2.jar for PDF processing
 """
 
 import subprocess
@@ -21,7 +21,7 @@ class JarProcessor:
         Initialize the JAR processor.
 
         Args:
-            jar_path: Path to the Lohnkonten JAR file (default: ./Lohnkonten-1.0.0.jar)
+            jar_path: Path to the Lohnkonten JAR file (default: ./Lohnkonten-1.0.2.jar)
             template_path: Path to the template file (default: ./template.xlsx)
             output_dir: Directory for output files (default: ./output)
         """
@@ -29,7 +29,7 @@ class JarProcessor:
         self.base_dir = Path(__file__).parent
 
         # Set default paths relative to base directory
-        self.jar_path = jar_path or str(self.base_dir / "Lohnkonten-1.0.1.jar")
+        self.jar_path = jar_path or str(self.base_dir / "Lohnkonten-1.0.0.jar")
         self.template_path = template_path or str(self.base_dir / "template.xlsx")
         self.output_dir = output_dir or str(self.base_dir / "output")
 
@@ -112,7 +112,7 @@ class JarProcessor:
             cwd = working_dir if working_dir else os.getcwd()
 
             # Build the command
-            # java -jar Lohnkonten-1.0.0.jar <pdf_path> <password> <template_path>
+            # java -jar Lohnkonten-1.0.2.jar <pdf_path> <password> <template_path>
             command = [
                 "java",
                 "-jar",
